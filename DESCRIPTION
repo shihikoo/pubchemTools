@@ -1,0 +1,17 @@
+Package: pubchemTools
+Type: Package
+Title: Tools for retriving infomration from pubchem
+Version: 0.1.0
+Author: person("Jing", "Liao", email = "shihikoo@gmail.com",
+                  role = c("aut", "cre"))
+Maintainer: shihikoo <shihikoo@gmail.com>
+Description: Tools for retriving information from PubChem using NCBI public API and PUG rest. 
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: httr, XML, stringr, stats, rjson
+RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
