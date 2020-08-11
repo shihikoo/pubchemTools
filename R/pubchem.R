@@ -1,45 +1,74 @@
+#' GetPubRestDescriptionJsonWithName
+#'
+#' @param chemName chemcial name
+#' @param waitTime wait time for each round
+#'
+#' @return result in json
+#' @export
+#'
+#' @examples GetPubRestDescriptionJsonWithName(chemName = "amoxicillin")
+#'
+#' @import rjson
+#'
+GetPubRestDescriptionJsonWithName <- function(chemName, waitTime = 0){
+  link <- GetPugRestUrl(chemName, searchDomain = "name", returnType="json", returnContent = "description")
+  content <- GetContentWithLink(link, waitTime )
+  jsonResult <- rjson::fromJSON(content)
+  return(jsonResult)
+}
 
-#' GetPubchemCId
+#' GetPubRestSynonymsJsonWithCID
+#'
+#' @param cid pubchem compound id
+#' @param waitTime wait time for each round
+#'
+#' @return result in json
+#' @export
+#'
+#' @examples GetPubRestSynonymsJsonWithCID(cid = "33613")
+#'
+#' @import rjson
+#'
+GetPubRestSynonymsJsonWithCID <- function(cid, waitTime = 0){
+  link <- GetPugRestUrl(cid, searchDomain = "cid", returnType="json", returnContent = "synonyms")
+  content <- GetContentWithLink(link, waitTime )
+  jsonResult <- rjson::fromJSON(content)
+  return(jsonResult)
+}
+
+#' GetSynonymsWithCID
+#' Retrive pubchem compound id with chemical name input
+#'
+#' @param cid pubchem compound id
+#' @param waitTime wait time for each run
+#'
+#' @return chemName in string with cid as
+#' @export
+#'
+#' @examples GetSynonymsWithCID(cid = "33613")
+#'
+GetSynonymsWithCID <- function(cid, waitTime = 0){
+  jsonResult <- GetPubRestSynonymsJsonWithCID(cid, waitTime = 0)
+  synonyms <- jsonResult$InformationList$Information[[1]]$Synonym
+  return(synonyms)
+}
+
+#' GetCIDWithName
 #' Retrive pubchem compound id with chemical name input
 #'
 #' @param chemName chemical name
 #' @param waitTime wait time for each run
 #'
-#' @return cid in string
+#' @return chemName in string with cid as
 #' @export
 #'
-#' @examples GetPubchemCId(chemName = "amoxicillin")
+#' @examples GetCIDWithName(chemName = "amoxicillin")
 #'
-GetPubchemCId <- function(chemName, waitTime = 0){
-  jsonResult <- GetPubRestJson(chemName, waitTime = 0)
-
-  cid <- jsonResult$PC_Compounds[[1]]$id$id$cid
-
+GetCIDWithName <- function(chemName, waitTime = 0){
+  jsonResult <- GetPubRestDescriptionJsonWithName(chemName,waitTime = 0)
+  cid <- jsonResult$InformationList$Information[[1]]$CID
+  chemName <- jsonResult$InformationList$Information[[1]]$Title
+  names(cid) <-chemName
   return(cid)
 }
 
-
-#' GetSynonyms
-#' Retrive all synonyms with input compound id
-#'
-#' @param cid compond id of pubchem database
-#' @param apiKey optional parameter. ApiKey of the user.
-#' @param email optional parameter. Email of the user.
-#'
-#' @return list of synonyms in strings
-#' @export
-#'
-#' @examples GetSynonyms(cid = "33613")
-#'
-#' @import XML
-#'
-GetSynonyms <- function(cid, apiKey="", email=""){
-  doc <- GetDoc( endpoint = "esummary", db = "pccompound", id = cid, apiKey = apiKey, email = email)
-
-  results <- do.call(rbind, XML::xpathApply(doc, "//DocSum", function(x) {
-    article <- XML::xmlDoc(x)
-    title <- RetriveXmlNodeValuefromDoc(doc, "//Item[@Name='SynonymList']//Item")
-    return(title)}))
-
-  return(as.list(results))
-}
